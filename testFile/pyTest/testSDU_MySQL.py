@@ -49,7 +49,7 @@ def runTest(port, silent=True, include_commit=False):
                     start_time = time.perf_counter()
                     with connection.cursor() as select_cursor:
                         query = "SELECT * FROM people WHERE name = %s"
-                        select_cursor.execute(query, ("Ethel Leaver",))
+                        select_cursor.execute(query, ("Crystal Barnhill",))
                         row = select_cursor.fetchone()
                     execution_times.append(time.perf_counter() - start_time)
                     if not silent:
@@ -162,6 +162,6 @@ def runTest(port, silent=True, include_commit=False):
     return execution_times
 
 if __name__ == "__main__":
-    results = runTest(3306, False)
+    results = runTest(9092, False)
     print("Execution Times:", results)
 

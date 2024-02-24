@@ -11,7 +11,7 @@ from mysql_mimic.session import Query
 
 from testFile.tools import reset_db_timeout_to_default, set_db_timeout
 
-# Configurazione del middleware e del server di log degli errori
+# Middleware and server error
 DB_HOST = 'localhost'
 DB_PORT = 3306
 DB_USER = 'TestMiddleware'
@@ -23,17 +23,11 @@ ERROR_LOG_SERVER_PORT = 9091
 # Increase timeouts before starting long operations
 increased_wait_timeout = 604800  # set to 1 week
 increased_interactive_timeout = 604800
-db_conn = None
 
 
 # Connection to DB and server error
-try:
-    db_conn = mysql.connector.connect(host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS, database=DB_NAME)
-    set_db_timeout(db_conn, increased_wait_timeout, increased_interactive_timeout)
-finally:
-    if db_conn.is_connected():
-        reset_db_timeout_to_default(db_conn)
-        db_conn.close()
+db_conn = mysql.connector.connect(host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS, database=DB_NAME)
+set_db_timeout(db_conn, increased_wait_timeout, increased_interactive_timeout)
 
 error_log_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 error_log_socket.connect((ERROR_LOG_SERVER_HOST, ERROR_LOG_SERVER_PORT))
@@ -72,11 +66,15 @@ async def auth_handler(username, password):
     return False
 
 async def start_server():
-    middleware = MysqlServer(session_factory=MyCustomSession)
-    #middleware.auth_handler = auth_handler
+    try:
+        middleware = MysqlServer(session_factory=MyCustomSession)
+        #middleware.auth_handler = auth_handler
 
-    await middleware.start_server(port=9092)
-    await middleware.serve_forever()
+        await middleware.start_server(port=9092)
+        await middleware.serve_forever()
+    finally:
+        reset_db_timeout_to_default(db_conn)
+        db_conn.close()
 
 
 def log_error_to_server(error_message):
