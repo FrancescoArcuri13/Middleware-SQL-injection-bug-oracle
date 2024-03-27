@@ -20,8 +20,8 @@ delay_point_from_sum = []
 
 
 # data extraction
-file_path_proxy = 'result_Proxy_1000000.csv'
-file_path_no_proxy = 'result_noProxy_1000000.csv'
+file_path_proxy = 'result_Proxy_500000_ZenBook_Bill.csv'
+file_path_no_proxy = 'result_noProxy_500000_ZenBook_Bill.csv'
 
 # read CSV
 df = pd.read_csv(file_path_proxy)
@@ -70,8 +70,8 @@ print("delay average: " + str(delay_average_proxy))
 # Creating a DataFrame to hold the data
 data = {
     'Operation': ['Select', 'Delete', 'Insert', 'Error'],
-    'No Proxy': time_mean_noProxy[1:],
-    'Proxy': time_mean_Proxy[1:]
+    'No MyMOBSI': time_mean_noProxy[1:],
+    'MyMOBSI': time_mean_Proxy[1:]
 }
 
 df = pd.DataFrame(data)
@@ -87,7 +87,7 @@ plt.title('Operation Time Comparison')  # Setting the title of the plot
 plt.xlabel('Operation')  # Naming the x-axis
 plt.ylabel('Time')  # Naming the y-axis
 plt.xticks(rotation=45)  # Rotating the x-axis labels for better readability
-plt.legend(title='Proxy Usage')  # Adding a legend with a title
+plt.legend(title='MyMOBSI Usage')  # Adding a legend with a title
 
 # Adjust layout to make room for labels and titles
 plt.tight_layout()
@@ -139,7 +139,7 @@ plt.title('Operation Time Comparison')  # Setting the title of the plot
 plt.xlabel('Operation')  # Naming the x-axis
 plt.ylabel('Percent')  # Naming the y-axis
 plt.xticks(rotation=45)  # Rotating the x-axis labels for better readability
-plt.legend(title='Proxy Usage')  # Adding a legend with a title
+plt.legend(title='MyMOBSI Usage')  # Adding a legend with a title
 
 # Adjust layout to make room for labels and titles
 plt.tight_layout()
@@ -158,6 +158,7 @@ plt.savefig('graphs/delay_average_proxy.png')
 # Convert the matrix into a pandas DataFrame with a column for each action
 df = pd.DataFrame([row[1:] for row in matrix_sum_proxy], columns=['Select', 'Delete', 'Insert', 'Error'])
 
+df = df / 60
 
 # Now, plot the DataFrame
 plt.figure(figsize=(10, 6))
@@ -169,7 +170,7 @@ for column in df.columns:
 # Add title and labels
 plt.title('Cumulative Time for Operations')
 plt.xlabel('Observation')
-plt.ylabel('Cumulative Time')
+plt.ylabel('Cumulative Time (minutes)')
 
 # Display the legend
 plt.legend()
@@ -182,6 +183,9 @@ plt.savefig('graphs/Linear_graph_sum_time_proxy.png')
 df_proxy = pd.DataFrame([row[1:] for row in matrix_sum_proxy], columns=['Select', 'Delete', 'Insert', 'Error'])
 df_no_proxy = pd.DataFrame([row[1:] for row in matrix_sum_noProxy], columns=['Select', 'Delete', 'Insert', 'Error'])
 
+# Convert seconds to minutes for both DataFrames
+df_proxy = df_proxy / 60
+df_no_proxy = df_no_proxy / 60
 
 # Now, plot the DataFrame
 plt.figure(figsize=(14, 8))
@@ -192,19 +196,19 @@ colors_proxy = ['b', 'g', 'r', 'c']
 # Plot a line for each column in the proxy DataFrame
 for i, column in enumerate(df_proxy.columns):
     plt.plot(df_proxy.index, df_proxy[column],
-             label=f'{column} (Proxy)',
+             label=f'{column} (MyMOBSI)',
              color=colors_proxy[i])
 
 # Plot a line for each column in the no proxy DataFrame
 for i, column in enumerate(df_no_proxy.columns):
     plt.plot(df_no_proxy.index, df_no_proxy[column],
-             label=f'{column} (No Proxy)',
+             label=f'{column} (No MyMOBSI)',
              color=colors_proxy[i], linestyle='--')
 
 # Add title and labels
-plt.title('Cumulative Time for Operations with and without Proxy')
+plt.title('Cumulative Time for Operations with and without MyMOBSI')
 plt.xlabel('Observation Number')
-plt.ylabel('Cumulative Time (seconds)')
+plt.ylabel('Cumulative Time (minutes)')
 
 # Display the legend
 plt.legend()
@@ -219,7 +223,7 @@ df_accumulated_delay = pd.DataFrame([row[1:] for row in accumulated_delay_matrix
                                     columns=['Select', 'Delete', 'Insert', 'Error'])
 
 # if Convert the delay values from seconds to minutes by dividing by 60
-df_accumulated_delay_minutes = df_accumulated_delay
+df_accumulated_delay_minutes = df_accumulated_delay / 60
 
 # Now, plot the DataFrame
 plt.figure(figsize=(14, 8))
@@ -234,9 +238,36 @@ for i, column in enumerate(df_accumulated_delay_minutes.columns):
 # Add title and labels
 plt.title('Accumulated Delay for Operations')
 plt.xlabel('Observation Number')
-plt.ylabel('Accumulated Delay (seconds)')
+plt.ylabel('Accumulated Delay (minutes)')
 
 # Display the legend
 plt.legend()
 
 plt.savefig('graphs/Linear_graph_accumulated_delay.png')
+
+
+# ----- df_summary.to_csv('/path/to/your/summary_table.csv') -----
+
+difference = [proxy - no_proxy for proxy, no_proxy in zip(time_sum_proxy, time_sum_noProxy)]
+
+# Summarize the data in a pandas DataFrame
+operations = ['Select', 'Delete', 'Insert', 'Error']
+data = {
+    'Operation': operations,
+    'MyMOBSI': time_sum_proxy[-4:],  # Selecting only the first four operations
+    'No MyMOBSI': time_sum_noProxy[-4:],
+    'Difference': difference[-4:]
+}
+
+df_summary = pd.DataFrame(data)
+df_summary.set_index('Operation', inplace=True)
+
+df_summary = df_summary / 60
+df_summary = df_summary.round(1)
+df_summary = df_summary.transpose()
+
+# Display the DataFrame
+print(df_summary)
+
+# If you need to export this DataFrame to a CSV file:
+df_summary.to_csv('graphs/summary_table.csv')

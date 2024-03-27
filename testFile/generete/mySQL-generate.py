@@ -29,14 +29,18 @@ try:
         """)
 
         # Delete old data
-        # cursor.execute("DELETE FROM people")
+        cursor.execute("DELETE FROM people")
+
 
         # Generate data
-        for _ in range(10):
+        for _ in range(9):
             name = names.get_full_name()
             age = random.randint(18, 80)
             email = name.lower().replace(" ", ".") + "@example.com"
             cursor.execute("INSERT INTO people (name, age, email) VALUES (%s, %s, %s)", (name, age, email))
+
+        cursor.execute("INSERT INTO people (name, age, email) VALUES (%s, %s, %s)",
+                       ("Frédéric Vasseur", 55, "frédéric.vasseur@scuderriaferrari.com"))
 
         connection.commit()
 

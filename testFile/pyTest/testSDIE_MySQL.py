@@ -23,7 +23,7 @@ def create_connection(port):
 def runTest(port, silent=True, include_commit=False):
     execution_time_ALL = time.perf_counter()
     execution_times = []
-    max_retries = 10 # number of attempts in case of error
+    max_retries = 10  # number of attempts in case of error
 
     # 0 Database Connection Time
     # 1 Select Query Time
@@ -45,11 +45,11 @@ def runTest(port, silent=True, include_commit=False):
             attempt = 0
             while attempt < max_retries:
                 try:
-                    # Selecting the tuple Jami Ramos
-                    start_time = time.perf_counter()
+                    # Selecting the tuple Frédéric Vasseur
                     with connection.cursor() as select_cursor:
                         query = "SELECT * FROM people WHERE name = %s"
-                        select_cursor.execute(query, ("Crystal Barnhill",))
+                        start_time = time.perf_counter()
+                        select_cursor.execute(query, ("Frédéric Vasseur",))
                         row = select_cursor.fetchone()
                     execution_times.append(time.perf_counter() - start_time)
                     if not silent:
@@ -70,9 +70,9 @@ def runTest(port, silent=True, include_commit=False):
             attempt = 0
             while attempt < max_retries:
                 try:
-                    start_time = time.perf_counter()
                     with connection.cursor() as delete_cursor:
                         delete_query = "DELETE FROM people WHERE id = " + str(id_to_delete)
+                        start_time = time.perf_counter()
                         delete_cursor.execute(delete_query)
                         if include_commit:
                             connection.commit()
@@ -94,10 +94,10 @@ def runTest(port, silent=True, include_commit=False):
             attempt = 0
             while attempt < max_retries:
                 try:
-                    start_time = time.perf_counter()
                     with connection.cursor() as insert_cursor:
                         columns = ', '.join(['%s'] * len(row))
                         insert_query = f"INSERT INTO people VALUES ({columns})"
+                        start_time = time.perf_counter()
                         insert_cursor.execute(insert_query, row)
                         if include_commit:
                             connection.commit()
@@ -117,34 +117,26 @@ def runTest(port, silent=True, include_commit=False):
 
 
             # Executing an erroneous query
-            attempt = 0
-            while attempt < max_retries:
-                try:
-                    try:
-                        with connection.cursor() as error_cursor:
-                            error_query = "DELETE " + random_string(5) + " FROM people"
-                            # error_query = random_string(28)
-                            start_time = time.perf_counter()
-                            error_cursor.execute(error_query)
-                            result = error_cursor.fetchall()
-                            if include_commit:
-                                connection.commit()
-                            execution_times.append(time.perf_counter() - start_time)
-                            if not include_commit:
-                                connection.commit()
-                            print(result)
-                    except mysql.connector.Error as err:
-                        execution_times.append(time.perf_counter() - start_time)
-                        if not silent:
-                            print("Error: ", err)
-                    break
-                except mysql.connector.Error as op_err:
+            try:
+                with connection.cursor() as error_cursor:
+                    error_query = "SELECT * FROM people WHERE name = " + random_string(5)
+                    # error_query = random_string(28)
+                    start_time = time.perf_counter()
+                    error_cursor.execute(error_query)
+                    result = error_cursor.fetchall()
+                    if include_commit:
+                        connection.commit()
+                    execution_times.append(time.perf_counter() - start_time)
+                    if not include_commit:
+                        connection.commit()
                     if not silent:
-                        print(op_err)
-                    attempt += 1
-                    time.sleep(0.2)
-                    if attempt >= max_retries:
-                        raise op_err
+                        print(result)
+            except mysql.connector.Error as err:
+                execution_times.append(time.perf_counter() - start_time)
+                if not silent:
+                    print("Error: ", err)
+
+
 
 
 

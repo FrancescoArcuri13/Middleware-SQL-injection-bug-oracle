@@ -1,17 +1,18 @@
+import platform
 import time
-from testFile.pyTest.testSDU_MySQL import runTest
+from testFile.pyTest.testSDIE_MySQL import runTest
 from testFile.tools import saveResult, estimate_completion_time, print_progress_bar, string_time, save_info
 
-numberOfTests = 1000
+numberOfTests = 1000000
 
 directory = "../testResult"  # Directory to save result
 
 path_serverError = "../../serverError-(fuzzer).py"
-path_Middleware = "../middleware.py"
+path_Middleware = "../MyMOBSI.py"
 
 path_generation = "../generate/mySQL-generate.py"
 
-info_file = "/info_" + str(numberOfTests) + ".txt"
+info_file = "/info_" + str(numberOfTests) + "_" + platform.node()
 
 save_info(directory + info_file)
 
@@ -30,9 +31,9 @@ save_info(directory + info_file)
 #subprocess.run(["start", "cmd", "/k", "python", path_Middleware], shell=True)
 
 
-# Phase 1 Tests time without Middleware
 start = time.perf_counter()
 
+# Phase 1 Tests time without Middleware
 all_test_noProxy = []
 
 for i in range(numberOfTests):
@@ -48,7 +49,7 @@ for i in range(numberOfTests):
         print('\n********************')
 
 print("start saving result_noProxy_")
-saveResult(directory, all_test_noProxy, "result_noProxy_" + str(numberOfTests) + ".csv")
+saveResult(directory, all_test_noProxy, "result_noProxy_" + str(numberOfTests) + "_" + platform.node() + ".csv")
 print("saving finished result_noProxy_")
 time.sleep(5)
 start += 5
@@ -62,7 +63,7 @@ for i in range(numberOfTests):
     all_test_Proxy.append(test_execution)
     if i % 100 == 0:
         print("Proxy:" + str(i))
-        remaining_time = estimate_completion_time(numberOfTests - i, time.perf_counter()-start, i ) # + numberOfTests)
+        remaining_time = estimate_completion_time(numberOfTests - i, time.perf_counter()-start, i)  # + numberOfTests)
         print("remaining_time: " + string_time(remaining_time))
         print('********************')
         print_progress_bar(2*numberOfTests, numberOfTests + i)
@@ -77,6 +78,6 @@ with open(directory + info_file, "a") as file:
     file.write("execution " + str(numberOfTests) + " times proxy and noProxy: " + string_time(total_time))
 
 print("start saving result_Proxy_")
-saveResult(directory, all_test_Proxy, "result_Proxy_" + str(numberOfTests) + ".csv")
+saveResult(directory, all_test_Proxy, "result_Proxy_" + str(numberOfTests) + "_" + platform.node() + ".csv")
 print("saving finished result_Proxy_")
 
