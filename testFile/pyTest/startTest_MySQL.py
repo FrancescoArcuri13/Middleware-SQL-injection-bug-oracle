@@ -63,7 +63,7 @@ for i in range(numberOfTests):
     all_test_Proxy.append(test_execution)
     if i % 100 == 0:
         print("Proxy:" + str(i))
-        remaining_time = estimate_completion_time(numberOfTests - i, time.perf_counter()-start, i)  # + numberOfTests)
+        remaining_time = estimate_completion_time(numberOfTests - i, time.perf_counter()-start, i + numberOfTests)
         print("remaining_time: " + string_time(remaining_time))
         print('********************')
         print_progress_bar(2*numberOfTests, numberOfTests + i)
