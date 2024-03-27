@@ -1,2 +1,2 @@
 # Middleware-SQL-injection-bug-oracle
-Proxy server acting as a bug oracle in the context of web fuzzing
+MyMOBSI is a prototype created as part of a thesis project at the University of Calabria. The prototype makes it possible to create a srever that acts as a MySQL sittial database to which queries can be forwarded, this in turn forwards them to the real database and in the event of an error sends a report to an error server before returning the error to the application. The goal of the lavore is to realize a SQL injection oracle bug without having to modify the source code or any interpreter.
